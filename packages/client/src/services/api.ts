@@ -1,4 +1,4 @@
-import type { HotTopic, HotTopicPage, TimelineEvent } from "../types";
+import type { HotTopic, HotTopicPage, TimelineEvent, KeywordConfig } from "../types";
 
 const BASE = "/api";
 
@@ -43,4 +43,32 @@ export function fetchTimeline(hotTopicId: string) {
 /** 获取系统统计 */
 export function fetchStats() {
   return request<{ topicCount: number; alertCount: number }>("/stats");
+}
+
+// ── 关键词管理 ──
+
+export function fetchKeywords(activeOnly = false) {
+  return request<KeywordConfig[]>(`/keywords${activeOnly ? "?activeOnly=true" : ""}`);
+}
+
+export function createKeyword(data: { keyword: string; isRegex?: boolean; exclude?: string; geo?: string }) {
+  return request<KeywordConfig>("/keywords", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateKeyword(id: string, data: Partial<{ keyword: string; isRegex: boolean; exclude: string; geo: string; isActive: boolean }>) {
+  return request<KeywordConfig>(`/keywords/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function toggleKeyword(id: string) {
+  return request<KeywordConfig>(`/keywords/${id}/toggle`, { method: "PATCH" });
+}
+
+export function deleteKeyword(id: string) {
+  return request<void>(`/keywords/${id}`, { method: "DELETE" });
 }

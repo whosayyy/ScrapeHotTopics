@@ -1,10 +1,14 @@
+import { useState } from "react";
 import type { PipelineProgress } from "../../types";
+import { KeywordSettings } from "../keywords/KeywordSettings";
 
 interface HeaderProps {
   progress: PipelineProgress | null;
 }
 
 export function Header({ progress }: HeaderProps) {
+  const [kwOpen, setKwOpen] = useState(false);
+
   return (
     <header className="h-14 border-b border-gray-800/50 bg-gray-950/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0">
       <div className="flex items-center gap-3">
@@ -31,8 +35,17 @@ export function Header({ progress }: HeaderProps) {
             <span className="font-mono">{progress.stage}</span>
           </div>
         )}
+        <button
+          onClick={() => setKwOpen(true)}
+          className="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors border border-gray-800 hover:border-cyan-800 px-2 py-1 rounded font-mono"
+          title="关键词配置 (正则/排除词/地理围栏)"
+        >
+          KW
+        </button>
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="系统在线" />
       </div>
+
+      {kwOpen && <KeywordSettings />}
     </header>
   );
 }

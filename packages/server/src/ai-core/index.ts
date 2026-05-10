@@ -184,6 +184,8 @@ export async function processIncomingData(
   for (const event of events) {
     // 创建或更新热点话题
     const { id: topicId } = await findOrCreateTopic(event);
+    // 用真实数据库 ID 覆盖 eventId，确保前端点击跳转时能找到正确记录
+    event.eventId = topicId;
 
     // 创建事件时间轴条目
     for (const tl of event.timeline) {

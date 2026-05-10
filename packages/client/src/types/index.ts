@@ -88,3 +88,15 @@ export interface PipelineProgress {
   percent: number;
   message?: string;
 }
+
+/** 关键词配置 */
+export interface KeywordConfig {
+  id: string;
+  keyword: string;
+  isActive: boolean;
+  isRegex: boolean;
+  exclude: string | null;
+  geo: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
