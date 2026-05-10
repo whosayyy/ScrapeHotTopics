@@ -3,6 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import { createCrawlerEngine } from "./crawler/index.js";
 import { initSocketIO } from "./socket/index.js";
+import { apiRouter, errorHandler } from "./routes/index.js";
 import logger from "./lib/logger.js";
 
 const log = logger.child({ module: "Server" });
@@ -22,6 +23,10 @@ app.get("/api/health", (_req, res) => {
     ai: { configured: Boolean(process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== "sk-your-key-here") },
   });
 });
+
+// ── REST API 路由 ──
+app.use("/api", apiRouter);
+app.use(errorHandler);
 
 // ── Socket.IO 实时通信 ──
 initSocketIO(httpServer);
