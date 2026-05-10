@@ -1,0 +1,91 @@
+// ──────────────────────────────────────────────
+// HotRadar — Prisma Schema
+// 开发阶段使用 SQLite，生产切换至 PostgreSQL
+// ──────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 热点话题
+model HotTopic {
+  id          String   @id @default(cuid())
+  title       String
+  summary     String?
+  credibility String   @default("待验证") // 高可信 | 待验证 | 谣言
+  heatScore   Int      @default(0)
+  category    String?
+  topSource   String?
+  tags        String?  // JSON array
+  isAlert     Boolean  @default(false)
+
+  events      Event[]
+  newsItems   NewsItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// AI 生成的事件时间轴条目
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  timestamp   DateTime
+  sourceUrl   String?
+
+  hotTopicId  String
+  hotTopic    HotTopic @relation(fields: [hotTopicId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+}
+
+/// 爬虫原始新闻条目
+model NewsItem {
+  id          String   @id @default(cuid())
+  sourceId    String   // 数据源标识: bilibili | twitter | hackernews | ...
+  externalId  String   // 源站唯一 ID
+  title       String
+  url         String
+  content     String?
+  author      String?
+  publishedAt DateTime
+  heat        Int      @default(0)
+  credibility String?  // AI 可信度标签
+
+  hotTopicId  String?
+  hotTopic    HotTopic? @relation(fields: [hotTopicId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([sourceId, externalId])
+  @@index([sourceId])
+  @@index([publishedAt])
+}
+
+/// 关键词配置
+model KeywordConfig {
+  id        String   @id @default(cuid())
+  keyword   String   @unique
+  isActive  Boolean  @default(true)
+  isRegex   Boolean  @default(false)
+  exclude   String?  // 排除词，分号分隔
+  geo       String?  // 地理围栏
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// 用户设置（预留）
+model UserSettings {
+  id        String   @id @default("default")
+  email     String?
+  alertSound  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
