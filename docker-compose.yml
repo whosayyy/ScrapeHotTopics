@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    container_name: hotradar-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=file:./data/dev.db
+      - CLIENT_ORIGIN=http://localhost:80
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      - CRAWLER_INTERVAL_MIN=${CRAWLER_INTERVAL_MIN:-1}
+      - CRAWLER_INTERVAL_MAX=${CRAWLER_INTERVAL_MAX:-5}
+    volumes:
+      - server-data:/app/packages/server/prisma/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  client:
+    build:
+      context: .
+      dockerfile: packages/client/Dockerfile
+    container_name: hotradar-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - VITE_SOCKET_URL=http://localhost:3001
+    depends_on:
+      server:
+        condition: service_healthy
+
+volumes:
+  server-data:
