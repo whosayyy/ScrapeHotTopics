@@ -7,9 +7,8 @@ import { SogouWechatAdapter } from "./adapters/sogou-wechat.js";
 import { RedditAdapter } from "./adapters/reddit.js";
 import { GoogleTrendsAdapter } from "./adapters/google-trends.js";
 import { TwitterAdapter } from "./adapters/twitter.js";
-import { newsItemService } from "../services/index.js";
+import { processIncomingData } from "../ai-core/index.js";
 import logger from "../lib/logger.js";
-import type { RawNews } from "./types.js";
 
 const log = logger.child({ module: "CrawlerBootstrap" });
 
@@ -19,24 +18,18 @@ const DEFAULT_KEYWORDS = {
   geo: "global",
 };
 
-function rawNewsToCreateInput(item: RawNews) {
-  return {
-    sourceId: item.sourceId,
-    externalId: item.externalId,
-    title: item.title,
-    url: item.url,
-    content: item.content,
-    author: item.author,
-    publishedAt: item.publishedAt.toISOString(),
-    heat: item.heat ?? 0,
-  };
-}
-
 export function createCrawlerEngine(): CrawlerEngine {
-  const engine = new CrawlerEngine(async (items: RawNews[]) => {
-    const inputs = items.map(rawNewsToCreateInput);
-    const result = await newsItemService.upsertMany(inputs);
-    log.info({ total: items.length, saved: result.items.length, failed: result.errors.length }, "crawler data persisted");
+  const engine = new CrawlerEngine(async (items) => {
+    try {
+      await processIncomingData(items, {
+        onProgress: (stage, percent) => {
+          log.debug({ stage, percent }, "ai-core progress");
+        },
+      });
+      log.info({ count: items.length }, "crawler data processed via AI Core");
+    } catch (err) {
+      log.error({ err, count: items.length }, "failed to process crawler data");
+    }
   });
 
   engine.register(new BilibiliAdapter(), { ...DEFAULT_KEYWORDS });

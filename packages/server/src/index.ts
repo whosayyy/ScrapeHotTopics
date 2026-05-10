@@ -15,15 +15,19 @@ app.use(express.json({ limit: "1mb" }));
 
 // ── 健康检查 ──
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    ai: { configured: Boolean(process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== "sk-your-key-here") },
+  });
 });
 
-// ── 爬虫引擎 ──
+// ── 爬虫引擎（数据流经 AI Core 处理后持久化） ──
 const crawlerEngine = createCrawlerEngine();
 
 // ── 启动 ──
 httpServer.listen(PORT, () => {
-  log.info(`listening on http://localhost:${PORT}`);
+  log.info({ ai: Boolean(process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== "sk-your-key-here") }, `listening on http://localhost:${PORT}`);
   crawlerEngine.start();
 });
 
