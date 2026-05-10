@@ -84,6 +84,41 @@ export function TimelinePanel({ topic }: TimelinePanelProps) {
           </div>
         )}
       </div>
+
+      {/* 相关新闻 */}
+      {topic.newsItems && topic.newsItems.length > 0 && (
+        <div className="mt-6 pt-4 border-t border-gray-800/50">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            相关新闻 ({topic.newsItems.length})
+          </h3>
+          <div className="space-y-2">
+            {topic.newsItems.map((item) => (
+              <div key={item.id} className="glass-card p-3 hover:border-cyan-500/20 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="text-sm font-medium text-gray-200 leading-snug">{item.title}</h4>
+                  <span className="text-[10px] font-mono text-cyan-500 shrink-0">{item.heat}</span>
+                </div>
+                {item.content && (
+                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-3">
+                    {item.content}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-[10px] text-gray-600 font-mono">{item.sourceId}</span>
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-cyan-500 hover:text-cyan-400 underline underline-offset-2 truncate"
+                  >
+                    {item.url}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

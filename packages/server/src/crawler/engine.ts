@@ -64,6 +64,14 @@ export class CrawlerEngine {
     }
   }
 
+  /** 同步所有适配器的关键词（从数据库批量加载后调用） */
+  updateAllKeywords(keywords: CrawlerKeywords): void {
+    for (const [id, task] of this.tasks) {
+      task.keywords = keywords;
+    }
+    log.info({ count: this.tasks.size }, "all adapter keywords updated");
+  }
+
   private async executeTask(task: CrawlerTask): Promise<void> {
     if (task.isRunning) {
       log.warn({ sourceId: task.adapter.sourceId }, "previous fetch still in progress, skip");

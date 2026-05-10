@@ -42,6 +42,7 @@ export interface NewsItem {
   sourceId: string;
   title: string;
   url: string;
+  content: string | null;
   publishedAt: string;
   heat: number;
 }
