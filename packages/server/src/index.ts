@@ -1,6 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
+import { createCrawlerEngine } from "./crawler/index.js";
+import logger from "./lib/logger.js";
+
+const log = logger.child({ module: "Server" });
 
 const app = express();
 const httpServer = createServer(app);
@@ -14,16 +18,21 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
 
+// ── 爬虫引擎 ──
+const crawlerEngine = createCrawlerEngine();
+
 // ── 启动 ──
 httpServer.listen(PORT, () => {
-  console.log(`[server] listening on http://localhost:${PORT}`);
+  log.info(`listening on http://localhost:${PORT}`);
+  crawlerEngine.start();
 });
 
 // ── 优雅关闭 ──
 const shutdown = () => {
-  console.log("[server] shutting down...");
+  log.info("shutting down...");
+  crawlerEngine.stop();
   httpServer.close(() => {
-    console.log("[server] closed");
+    log.info("closed");
     process.exit(0);
   });
 };
