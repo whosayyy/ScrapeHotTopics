@@ -71,12 +71,10 @@ export function WaterfallPanel({ topics, loading, error, onSelect }: WaterfallPa
             </span>
           </div>
 
-          {/* 摘要 */}
-          {topic.summary && (
-            <p className="text-xs text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">
-              {topic.summary}
-            </p>
-          )}
+          {/* 摘要（无 AI 摘要时显示原始内容片断） */}
+          <p className="text-xs text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">
+            {topic.summary || topic.newsItems?.[0]?.content || "暂无摘要"}
+          </p>
 
           {/* 底部信息 */}
           <div className="flex items-center gap-2 mt-2">

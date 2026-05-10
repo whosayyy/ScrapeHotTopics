@@ -21,9 +21,9 @@ describe("KeywordSettings", () => {
     vi.clearAllMocks();
   });
 
-  it("shows KW button when closed", () => {
-    render(<KeywordSettings />);
-    expect(screen.getByText("KW")).toBeDefined();
+  it("renders nothing when closed", () => {
+    const { container } = render(<KeywordSettings open={false} onClose={() => {}} />);
+    expect(container.firstChild).toBeNull();
   });
 
   it("loads keywords on open", async () => {
@@ -31,8 +31,7 @@ describe("KeywordSettings", () => {
       { id: "1", keyword: "AI", isActive: true, isRegex: false, exclude: null, geo: null, createdAt: "", updatedAt: "" },
     ]);
 
-    render(<KeywordSettings />);
-    fireEvent.click(screen.getByText("KW"));
+    render(<KeywordSettings open={true} onClose={() => {}} />);
 
     await waitFor(() => {
       expect(screen.getByText("AI")).toBeDefined();
@@ -43,8 +42,7 @@ describe("KeywordSettings", () => {
   it("shows empty state when no keywords", async () => {
     mockFetchKeywords.mockResolvedValue([]);
 
-    render(<KeywordSettings />);
-    fireEvent.click(screen.getByText("KW"));
+    render(<KeywordSettings open={true} onClose={() => {}} />);
 
     await waitFor(() => {
       expect(screen.getByText("暂无关键词，添加一个开始监控")).toBeDefined();

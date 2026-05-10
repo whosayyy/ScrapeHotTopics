@@ -2,8 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import type { KeywordConfig } from "../../types";
 import { fetchKeywords, createKeyword, updateKeyword, deleteKeyword, toggleKeyword } from "../../services/api";
 
-export function KeywordSettings() {
-  const [open, setOpen] = useState(false);
+interface KeywordSettingsProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function KeywordSettings({ open, onClose }: KeywordSettingsProps) {
   const [keywords, setKeywords] = useState<KeywordConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
@@ -56,25 +60,18 @@ export function KeywordSettings() {
     await load();
   };
 
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors border border-gray-800 hover:border-cyan-800 px-2 py-1 rounded font-mono"
-        title="关键词配置"
-      >
-        KW
-      </button>
-    );
-  }
+  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-black/60 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 bg-black/60 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div className="w-full max-w-lg bg-gray-950 border border-gray-800 rounded-xl shadow-2xl">
         {/* 头部 */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-800">
           <h2 className="text-sm font-semibold text-gray-200">关键词配置</h2>
-          <button onClick={() => setOpen(false)} className="text-gray-600 hover:text-gray-300 text-sm">✕</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-300 text-sm">✕</button>
         </div>
 
         {/* 新增表单 */}
