@@ -56,7 +56,7 @@ async function findOrCreateTopic(event: ProcessedEvent): Promise<{ id: string; i
   const match = candidates.find((t) => titleSimilarity(t.title, event.title) > 0.4);
 
   if (match) {
-    // 更新已有话题（合并热度、摘要、可信度）
+    // 更新已有话题（合并热度、摘要、可信度及新字段）
     const existingCred = match.credibility as Credibility | null;
     const mergedCred: Credibility =
       event.credibility === "高可信" || existingCred === "高可信"
@@ -73,6 +73,25 @@ async function findOrCreateTopic(event: ProcessedEvent): Promise<{ id: string; i
       tags: match.tags
         ? JSON.stringify([...new Set([...JSON.parse(match.tags), ...event.tags])])
         : JSON.stringify(event.tags),
+      // 新字段传播（更新时只覆盖非空值）
+      platform: event.platform,
+      authorName: event.authorName,
+      authorHandle: event.authorHandle,
+      authorAvatar: event.authorAvatar,
+      isVerified: event.isVerified,
+      likes: event.likes,
+      retweets: event.retweets,
+      comments: event.comments,
+      views: event.views,
+      publishTime: event.publishTime,
+      aiReasoning: event.aiReasoning,
+      rawContent: event.rawContent,
+      region: event.region,
+      credibilityScore: event.credibilityScore,
+      virality: event.virality,
+      viralityScore: event.virality,
+      relevanceScore: event.relevanceScore,
+      urgency: event.urgency,
     });
 
     log.debug({ id: match.id, title: event.title }, "updated existing topic");
@@ -85,10 +104,30 @@ async function findOrCreateTopic(event: ProcessedEvent): Promise<{ id: string; i
     summary: event.summary,
     credibility: event.credibility,
     heatScore: event.heatScore,
-    category: event.tags[0] ?? undefined,
+    category: event.tags[0] ?? event.credibility ? (event as any).category : undefined,
     topSource: event.topSource,
     tags: JSON.stringify(event.tags),
     isAlert: event.heatScore >= BREAKING_THRESHOLD && event.credibility === "高可信",
+
+    // 新字段
+    platform: event.platform ?? "unknown",
+    authorName: event.authorName,
+    authorHandle: event.authorHandle,
+    authorAvatar: event.authorAvatar,
+    isVerified: event.isVerified ?? false,
+    likes: event.likes ?? 0,
+    retweets: event.retweets ?? 0,
+    comments: event.comments ?? 0,
+    views: event.views ?? 0,
+    publishTime: event.publishTime,
+    aiReasoning: event.aiReasoning,
+    rawContent: event.rawContent,
+    region: event.region,
+    credibilityScore: event.credibilityScore,
+    virality: event.virality,
+    viralityScore: event.virality,
+    relevanceScore: event.relevanceScore,
+    urgency: event.urgency ?? false,
   });
 
   log.info({ id: topic.id, title: event.title }, "created new topic");
@@ -116,6 +155,24 @@ function emitEvents(events: ProcessedEvent[]): void {
       credibility: event.credibility,
       heatScore: event.heatScore,
       publishedAt: new Date().toISOString(),
+      // 扩展推送字段
+      platform: event.platform,
+      authorName: event.authorName,
+      authorHandle: event.authorHandle,
+      authorAvatar: event.authorAvatar,
+      isVerified: event.isVerified,
+      likes: event.likes,
+      retweets: event.retweets,
+      comments: event.comments,
+      views: event.views,
+      region: event.region,
+      credibilityScore: event.credibilityScore,
+      virality: event.virality,
+      viralityScore: event.virality,
+      relevanceScore: event.relevanceScore,
+      urgency: event.urgency,
+      aiReasoning: event.aiReasoning,
+      rawContent: event.rawContent,
     });
 
     if (event.heatScore >= BREAKING_THRESHOLD && event.credibility === "高可信") {
@@ -204,7 +261,6 @@ export async function processIncomingData(
 
     // 关联 NewsItem 到 HotTopic（通过 sourceId + externalId 反向查找）
     for (const url of event.relatedUrls) {
-      // 从 savedResult 中查找匹配的 news item
       const matched = savedResult.items.find((item) => item.url === url);
       if (matched && !matched.hotTopicId) {
         try {

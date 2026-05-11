@@ -18,12 +18,28 @@ function fulfilledValue<T>(result: PromiseSettledResult<T>): T | undefined {
   return result.status === "fulfilled" ? result.value : undefined;
 }
 
+/** 平台名映射 */
+function platformDisplay(sourceId: string): string {
+  const map: Record<string, string> = {
+    twitter: "Twitter",
+    bilibili: "Bilibili",
+    hackernews: "Hacker News",
+    "github-trending": "GitHub",
+    bing: "Bing News",
+    baidu: "Baidu",
+    "sogou-wechat": "微信",
+    reddit: "Reddit",
+    "google-trends": "Google Trends",
+  };
+  return map[sourceId] ?? sourceId;
+}
+
 /**
  * 完整 AI 清洗流水线
  * 输入：爬虫原始数据
  * 输出：清洗后的事件列表
  *
- * 流程：去重聚合 → 可信度分析 → 时间线生成 → 摘要生成 → 排序
+ * 流程：去重聚合 → 可信度分析 → 噪音过滤 → 时间线生成 → 摘要生成 → 排序
  */
 export async function runPipeline(
   rawItems: RawNews[],
@@ -51,11 +67,44 @@ export async function runPipeline(
     }),
   );
 
-  options?.onProgress?.({ stage: "时间线生成", percent: 60, message: `生成 ${groups.length} 组时间线` });
+  // Step 2.5: 过滤噪音条目
+  const resultMap = new Map<number, CredibilityResult>();
+  for (let i = 0; i < allIndices.length; i++) {
+    const r = fulfilledValue(credibilityResults[i]!);
+    if (r) resultMap.set(allIndices[i]!, r);
+  }
+
+  const noiseIndices = new Set(
+    [...resultMap.entries()]
+      .filter(([, r]) => r.isNoise)
+      .map(([idx]) => idx),
+  );
+
+  for (const idx of noiseIndices) {
+    log.warn({ title: rawItems[idx]?.title?.slice(0, 50) }, "noise item skipped");
+  }
+
+  const nonNoiseIndices = allIndices.filter((idx) => !noiseIndices.has(idx));
+
+  if (nonNoiseIndices.length === 0) {
+    log.info("all items classified as noise, returning empty");
+    return [];
+  }
+
+  const filteredGroups = groups
+    .map((g) => ({
+      ...g,
+      indices: g.indices.filter((idx) => !noiseIndices.has(idx)),
+    }))
+    .filter((g) => g.indices.length > 0);
+
+  const filteredUnmatched = unmatched.filter((idx) => !noiseIndices.has(idx));
+
+  options?.onProgress?.({ stage: "时间线生成", percent: 60, message: `生成 ${filteredGroups.length} 组时间线` });
 
   // Step 3: 每组生成时间线
   const timelineResults = await Promise.allSettled(
-    groups.map(async (group) => {
+    filteredGroups.map(async (group) => {
       const items = group.indices.map((idx) => ({
         title: rawItems[idx]!.title,
         content: rawItems[idx]!.content,
@@ -73,15 +122,15 @@ export async function runPipeline(
   const events: ProcessedEvent[] = [];
 
   function getCredibility(rawIdx: number): CredibilityResult | undefined {
-    const pos = allIndices.indexOf(rawIdx);
-    return pos >= 0 ? fulfilledValue(credibilityResults[pos]!) : undefined;
+    return resultMap.get(rawIdx);
   }
 
   // 处理聚合组
-  for (let i = 0; i < groups.length; i++) {
-    const group = groups[i]!;
+  for (let i = 0; i < filteredGroups.length; i++) {
+    const group = filteredGroups[i]!;
     const timeline = fulfilledValue(timelineResults[i]!);
     const groupItems = group.indices.map((idx) => rawItems[idx]!);
+    const firstItem = groupItems[0]!;
 
     // 取该组最高的可信度作为事件可信度
     const creds = group.indices
@@ -92,6 +141,11 @@ export async function runPipeline(
       : creds.includes("待验证")
         ? "待验证"
         : "谣言";
+
+    // 取第一个非噪音可信度分析结果中的新字段
+    const firstCredResult = group.indices
+      .map((idx) => getCredibility(idx))
+      .find((c) => c && !c.isNoise);
 
     const summaryText = await generateSummary(
       groupItems.map((i) => i.content).join("\n"),
@@ -109,11 +163,30 @@ export async function runPipeline(
       topSource: groupItems[0]?.sourceId ?? "unknown",
       tags: [],
       heatScore: timeline?.heatScore ?? 50,
+
+      // 新字段传播
+      platform: firstItem.platform ?? platformDisplay(firstItem.sourceId),
+      authorName: firstItem.author,
+      authorHandle: firstItem.authorHandle,
+      authorAvatar: firstItem.authorAvatar,
+      isVerified: firstItem.isVerified,
+      likes: firstItem.likes,
+      retweets: firstItem.retweets,
+      comments: firstItem.comments,
+      views: firstItem.views,
+      publishTime: firstItem.publishedAt.toISOString(),
+      aiReasoning: firstCredResult?.aiReasoning,
+      rawContent: groupItems.map((i) => i.content).join("\n---\n"),
+      region: firstCredResult?.region,
+      credibilityScore: firstCredResult?.credibilityScore,
+      virality: firstCredResult?.virality,
+      urgency: firstCredResult?.urgency,
+      relevanceScore: firstCredResult?.relevanceScore,
     });
   }
 
   // 处理未匹配的单条
-  for (const idx of unmatched) {
+  for (const idx of filteredUnmatched) {
     const item = rawItems[idx]!;
     const credResult = getCredibility(idx);
 
@@ -135,6 +208,25 @@ export async function runPipeline(
       topSource: item.sourceId,
       tags: item.tags ?? [],
       heatScore: item.heat ?? 0,
+
+      // 新字段传播
+      platform: item.platform ?? platformDisplay(item.sourceId),
+      authorName: item.author,
+      authorHandle: item.authorHandle,
+      authorAvatar: item.authorAvatar,
+      isVerified: item.isVerified,
+      likes: item.likes,
+      retweets: item.retweets,
+      comments: item.comments,
+      views: item.views,
+      publishTime: item.publishedAt.toISOString(),
+      aiReasoning: credResult?.aiReasoning,
+      rawContent: item.content,
+      region: credResult?.region,
+      credibilityScore: credResult?.credibilityScore,
+      virality: credResult?.virality,
+      urgency: credResult?.urgency,
+      relevanceScore: credResult?.relevanceScore,
     });
   }
 

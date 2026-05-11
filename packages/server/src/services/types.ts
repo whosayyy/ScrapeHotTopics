@@ -41,6 +41,31 @@ export const CreateHotTopicSchema = z.object({
   topSource: z.string().max(100).optional(),
   tags: z.string().max(1000).optional(),
   isAlert: z.boolean().default(false),
+
+  // 来源元数据
+  platform: z.string().max(20).default("unknown"),
+  authorName: z.string().max(200).optional(),
+  authorHandle: z.string().max(200).optional(),
+  authorAvatar: z.string().max(500).optional(),
+  isVerified: z.boolean().default(false),
+
+  // 统计数据
+  likes: z.number().int().min(0).default(0),
+  retweets: z.number().int().min(0).default(0),
+  comments: z.number().int().min(0).default(0),
+  views: z.number().int().min(0).default(0),
+  publishTime: z.string().datetime({ offset: true }).or(z.string().pipe(z.coerce.date())).optional(),
+  fetchedTime: z.string().datetime({ offset: true }).or(z.string().pipe(z.coerce.date())).optional(),
+
+  // AI 分析详情
+  aiReasoning: z.string().max(10000).optional(),
+  rawContent: z.string().max(50000).optional(),
+  region: z.string().max(50).optional(),
+  credibilityScore: z.number().int().min(0).max(100).optional(),
+  virality: z.number().int().min(0).max(100).optional(),
+  viralityScore: z.number().int().min(0).max(100).optional(),
+  relevanceScore: z.number().int().min(0).max(100).optional(),
+  urgency: z.boolean().default(false),
 });
 export type CreateHotTopicInput = z.infer<typeof CreateHotTopicSchema>;
 
@@ -51,9 +76,12 @@ export type UpdateHotTopicInput = z.infer<typeof UpdateHotTopicSchema>;
 /** 查询过滤 */
 export const HotTopicFilterSchema = z.object({
   category: z.string().optional(),
+  region: z.string().optional(),
   credibility: CredibilityEnum.optional(),
   isAlert: z.boolean().optional(),
   search: z.string().max(200).optional(),
+  source: z.string().max(50).optional(),
+  sort: z.enum(["heatScore", "createdAt", "viralityScore", "credibilityScore"]).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });

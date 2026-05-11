@@ -50,7 +50,7 @@ packages/server/src/
 
 | 方法 | 路径 | 说明 | 参数 |
 |------|------|------|------|
-| GET | `/` | 分页列表 | `?category=&credibility=&isAlert=&search=&page=&pageSize=` |
+| GET | `/` | 分页列表 | `?category=&credibility=&isAlert=&search=&source=&sort=&page=&pageSize=` |
 | GET | `/ranking` | 排行榜 | `?limit=&sortBy=` |
 | GET | `/alerts` | 警报列表 | — |
 | GET | `/:id` | 详情（含 events + newsItems） | — |

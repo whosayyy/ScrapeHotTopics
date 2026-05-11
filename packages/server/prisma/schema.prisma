@@ -24,6 +24,31 @@ model HotTopic {
   tags        String?  // JSON array
   isAlert     Boolean  @default(false)
 
+  // 来源元数据
+  platform      String   @default("unknown")
+  authorName    String?
+  authorHandle  String?
+  authorAvatar  String?
+  isVerified    Boolean  @default(false)
+
+  // 统计数据
+  likes         Int      @default(0)
+  retweets      Int      @default(0)
+  comments      Int      @default(0)
+  views         Int      @default(0)
+  publishTime   DateTime?
+  fetchedTime   DateTime @default(now())
+
+  // AI 分析字段
+  aiReasoning      String?  // AI 详细分析理由
+  rawContent       String?  // 原始内容备份
+  region           String?  // 事件地区
+  credibilityScore Int?     // 可信度评分 (0-100)
+  virality         Int?     @default(0) // 爆发力评分 (0-100)
+  viralityScore    Int?     @default(0) // 爆发力/热度 (0-100)，与 virality 同步
+  relevanceScore   Int?     @default(0) // 与核心热点相关性 (0-100)
+  urgency          Boolean  @default(false)
+
   events      Event[]
   newsItems   NewsItem[]
 

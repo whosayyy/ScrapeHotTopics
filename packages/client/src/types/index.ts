@@ -1,6 +1,14 @@
 /** 可信度标签 — 与服务端 Credibility 一致 */
 export type Credibility = "高可信" | "待验证" | "谣言";
 
+/** 筛选状态 */
+export interface FilterState {
+  region: string;
+  category: string;
+  source: string;
+  sort: "createdAt" | "viralityScore" | "credibilityScore";
+}
+
 /** 热点话题（来自 REST API） */
 export interface HotTopic {
   id: string;
@@ -16,6 +24,27 @@ export interface HotTopic {
   newsItems: NewsItem[];
   createdAt: string;
   updatedAt: string;
+
+  // 扩展字段
+  platform?: string;
+  authorName?: string;
+  authorHandle?: string;
+  authorAvatar?: string;
+  isVerified?: boolean;
+  likes?: number;
+  retweets?: number;
+  comments?: number;
+  views?: number;
+  publishTime?: string;
+  aiReasoning?: string;
+  rawContent?: string;
+  region?: string;
+  credibilityScore?: number;
+  virality?: number;
+  viralityScore?: number;
+  relevanceScore?: number;
+  urgency?: boolean;
+  fetchedTime?: string;
 }
 
 /** 热点分页列表 */
@@ -81,6 +110,23 @@ export interface HotTopicNotification {
   credibility: Credibility;
   heatScore: number;
   publishedAt: string;
+
+  // 扩展字段
+  platform?: string;
+  authorName?: string;
+  authorHandle?: string;
+  authorAvatar?: string;
+  isVerified?: boolean;
+  likes?: number;
+  retweets?: number;
+  comments?: number;
+  views?: number;
+  region?: string;
+  credibilityScore?: number;
+  virality?: number;
+  urgency?: boolean;
+  aiReasoning?: string;
+  rawContent?: string;
 }
 
 /** AI 流水线进度 */

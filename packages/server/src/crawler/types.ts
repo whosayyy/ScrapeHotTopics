@@ -26,4 +26,16 @@ export interface RawNews {
   heat?: number;
   tags?: string[];
   raw: unknown;
+
+  // 来源元数据（扩展）
+  platform?: string;       // 显式平台名，缺省时用 sourceId
+  authorHandle?: string;
+  authorAvatar?: string;
+  isVerified?: boolean;
+
+  // 统计数据（扩展）
+  likes?: number;
+  retweets?: number;
+  comments?: number;
+  views?: number;
 }

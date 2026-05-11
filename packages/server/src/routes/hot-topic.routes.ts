@@ -23,9 +23,12 @@ hotTopicRoutes.get("/alerts", async (_req, res) => {
 hotTopicRoutes.get("/", async (req, res) => {
   const filter: HotTopicFilter = {
     category: req.query.category as string | undefined,
+    region: req.query.region as string | undefined,
     credibility: req.query.credibility as any,
     isAlert: req.query.isAlert === "true" ? true : req.query.isAlert === "false" ? false : undefined,
     search: req.query.search as string | undefined,
+    source: req.query.source as string | undefined,
+    sort: req.query.sort as any,
     page: parseInt(req.query.page as string, 10) || 1,
     pageSize: parseInt(req.query.pageSize as string, 10) || 20,
   };

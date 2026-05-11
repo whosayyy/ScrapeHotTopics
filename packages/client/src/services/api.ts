@@ -16,8 +16,15 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 /** 获取热点分页列表 */
-export function fetchTopics(page = 1, pageSize = 20) {
-  return request<HotTopicPage>(`/hot-topics?page=${page}&pageSize=${pageSize}`);
+export function fetchTopics(page = 1, pageSize = 20, filters?: { region?: string; category?: string; source?: string; sort?: string }) {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("pageSize", String(pageSize));
+  if (filters?.region) params.set("region", filters.region);
+  if (filters?.category) params.set("category", filters.category);
+  if (filters?.source) params.set("source", filters.source);
+  if (filters?.sort) params.set("sort", filters.sort);
+  return request<HotTopicPage>(`/hot-topics?${params}`);
 }
 
 /** 获取排行榜 */

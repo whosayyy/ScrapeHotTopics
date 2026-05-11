@@ -39,14 +39,16 @@ export class HotTopicService {
 
   /** 分页查询列表 */
   async findAll(filter: HotTopicFilter) {
-    const { category, credibility, isAlert, search, page, pageSize } =
+    const { category, region, credibility, isAlert, search, source, sort, page, pageSize } =
       HotTopicFilterSchema.parse(filter);
 
     const where: Prisma.HotTopicWhereInput = {};
 
     if (category) where.category = category;
+    if (region) where.region = region;
     if (credibility) where.credibility = credibility;
     if (isAlert !== undefined) where.isAlert = isAlert;
+    if (source) where.topSource = source;
     if (search) {
       where.OR = [
         { title: { contains: search } },
@@ -54,10 +56,19 @@ export class HotTopicService {
       ];
     }
 
+    // 排序
+    const orderBy: Prisma.HotTopicOrderByWithRelationInput = sort === "createdAt"
+      ? { createdAt: "desc" }
+      : sort === "viralityScore"
+        ? { viralityScore: "desc" }
+        : sort === "credibilityScore"
+          ? { credibilityScore: "desc" }
+          : { heatScore: "desc" };
+
     const [items, total] = await Promise.all([
       prisma.hotTopic.findMany({
         where,
-        orderBy: { heatScore: "desc" },
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

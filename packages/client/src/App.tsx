@@ -11,7 +11,7 @@ import { useRanking } from "./hooks/useRanking";
 import { useAlerts } from "./hooks/useAlerts";
 
 function App() {
-  const { topics, loading: topicsLoading, error: topicsError, selectedTopic, selectTopic, progress } = useTopics();
+  const { topics, loading: topicsLoading, error: topicsError, selectedTopic, selectTopic, progress, filter, setFilter } = useTopics();
   const { entries, loading: rankingLoading } = useRanking();
   const { alert, dismiss } = useAlerts();
   const [kwOpen, setKwOpen] = useState(false);
@@ -29,6 +29,8 @@ function App() {
             loading={topicsLoading}
             error={topicsError}
             onSelect={selectTopic}
+            filter={filter}
+            onFilterChange={setFilter}
           />
         }
         center={
