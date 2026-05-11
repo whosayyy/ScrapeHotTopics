@@ -31,6 +31,14 @@ describe("HotTopicService", () => {
         summary: "这是一个测试热点",
         credibility: "高可信",
         heatScore: 85,
+        isAlert: false,
+        platform: "Hacker News",
+        isVerified: false,
+        likes: 0,
+        retweets: 0,
+        comments: 0,
+        views: 0,
+        urgency: false,
       });
 
       expect(result).toEqual(sampleHotTopic);
@@ -42,7 +50,7 @@ describe("HotTopicService", () => {
     });
 
     it("rejects empty title", async () => {
-      await expect(service.create({ title: "" })).rejects.toThrow();
+      await expect(service.create({ title: "" } as any)).rejects.toThrow();
     });
   });
 

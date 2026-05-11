@@ -48,7 +48,7 @@ export function createMockPrisma() {
 
 export type MockPrisma = ReturnType<typeof createMockPrisma>;
 
-/** 模拟 hotTopic 数据 */
+/** 模拟 hotTopic 数据（与 Prisma schema 对齐） */
 export const sampleHotTopic = {
   id: "topic-1",
   title: "测试热点话题",
@@ -59,6 +59,25 @@ export const sampleHotTopic = {
   topSource: "hackernews",
   tags: '["科技","AI"]',
   isAlert: true,
+  platform: "Hacker News",
+  authorName: "test-author",
+  authorHandle: null,
+  authorAvatar: null,
+  isVerified: false,
+  likes: 0,
+  retweets: 0,
+  comments: 0,
+  views: 0,
+  publishTime: new Date("2026-05-10T00:00:00Z"),
+  fetchedTime: new Date("2026-05-10T00:00:00Z"),
+  aiReasoning: null,
+  rawContent: null,
+  region: null,
+  credibilityScore: null,
+  virality: 0,
+  viralityScore: 0,
+  relevanceScore: 0,
+  urgency: false,
   createdAt: new Date("2026-05-10T00:00:00Z"),
   updatedAt: new Date("2026-05-10T00:00:00Z"),
 };

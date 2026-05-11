@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import request from "supertest";
 import express from "express";
 import { apiRouter, errorHandler } from "../routes/index.js";
+import { sampleHotTopic } from "../test-utils.js";
 
 // Mock all services
 vi.mock("../services/hot-topic.service.js", () => ({
@@ -115,11 +116,9 @@ describe("Routes — Hot Topics", () => {
 
   it("GET /api/hot-topics/:id — returns a topic", async () => {
     vi.mocked(hotTopicService.findById).mockResolvedValue({
-      id: "topic-1", title: "Test", summary: null, credibility: "待验证",
-      heatScore: 50, category: null, topSource: null, tags: null,
-      isAlert: false, events: [], newsItems: [],
-      createdAt: new Date(), updatedAt: new Date(),
-    });
+      ...sampleHotTopic, id: "topic-1", title: "Test", credibility: "待验证",
+      events: [], newsItems: [],
+    } as any);
 
     const res = await request(app).get("/api/hot-topics/topic-1");
     expect(res.status).toBe(200);
@@ -128,9 +127,7 @@ describe("Routes — Hot Topics", () => {
 
   it("POST /api/hot-topics — creates a topic", async () => {
     vi.mocked(hotTopicService.create).mockResolvedValue({
-      id: "new-id", title: "New Topic", summary: null, credibility: "待验证",
-      heatScore: 50, category: null, topSource: null, tags: null,
-      isAlert: false, createdAt: new Date(), updatedAt: new Date(),
+      ...sampleHotTopic, id: "new-id", title: "New Topic", credibility: "待验证",
     });
 
     const res = await request(app).post("/api/hot-topics").send({ title: "New Topic" });
@@ -140,9 +137,7 @@ describe("Routes — Hot Topics", () => {
 
   it("PUT /api/hot-topics/:id — updates a topic", async () => {
     vi.mocked(hotTopicService.update).mockResolvedValue({
-      id: "topic-1", title: "Updated", summary: null, credibility: "待验证",
-      heatScore: 80, category: null, topSource: null, tags: null,
-      isAlert: false, createdAt: new Date(), updatedAt: new Date(),
+      ...sampleHotTopic, id: "topic-1", title: "Updated", heatScore: 80,
     });
 
     const res = await request(app).put("/api/hot-topics/topic-1").send({ heatScore: 80 });
@@ -158,9 +153,7 @@ describe("Routes — Hot Topics", () => {
 
   it("PATCH /api/hot-topics/:id/alert — toggles alert", async () => {
     vi.mocked(hotTopicService.markAlert).mockResolvedValue({
-      id: "topic-1", title: "Test", summary: null, credibility: "待验证",
-      heatScore: 50, category: null, topSource: null, tags: null,
-      isAlert: true, createdAt: new Date(), updatedAt: new Date(),
+      ...sampleHotTopic, id: "topic-1", title: "Test", isAlert: true, credibility: "待验证",
     });
 
     const res = await request(app).patch("/api/hot-topics/topic-1/alert").send({ isAlert: true });

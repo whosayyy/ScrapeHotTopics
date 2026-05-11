@@ -80,7 +80,59 @@ function formatTime(iso: string | undefined | null): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-// ── Aceternity UI 风格的筛选栏 ──
+// ── 自定义下拉框组件（Aceternity UI 风格）──
+
+function CustomSelect({ value, options, onChange, placeholder }: {
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const displayMap = {
+    "🌐 全部地区": "全部地区",
+    "📡 全部来源": "全部来源",
+  };
+
+  const displayValue = value
+    ? options.find((o) => (o === "全部" ? "" : o) === value) ?? value
+    : placeholder;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="flex items-center gap-1.5 bg-black/30 text-gray-300 text-[11px] border border-white/10 rounded-full px-3 py-1.5 pr-7 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_10px_rgba(6,182,212,0.1)] transition-all cursor-pointer whitespace-nowrap"
+      >
+        <span className={value ? "text-gray-200" : "text-gray-500"}>{displayValue}</span>
+        <span className={`absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>▾</span>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 min-w-[140px] bg-gray-900/95 backdrop-blur-md border border-white/10 rounded-xl py-1 shadow-xl z-50 overflow-hidden">
+          {options.map((opt) => {
+            const val = opt === "全部" ? "" : opt;
+            const active = value === val;
+            return (
+              <button
+                key={opt}
+                onMouseDown={() => { onChange(val); setOpen(false); }}
+                className={`w-full text-left px-3 py-1.5 text-[11px] transition-colors ${
+                  active
+                    ? "text-cyan-300 bg-gradient-to-r from-cyan-500/15 to-blue-500/15"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                }`}
+              >
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function FilterBar({ filter, onChange }: { filter: FilterState; onChange: (f: FilterState) => void }) {
   return (
@@ -115,32 +167,20 @@ function FilterBar({ filter, onChange }: { filter: FilterState; onChange: (f: Fi
       {/* 第二行：地区 + 来源 + 排序 */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* 地区下拉 */}
-        <div className="relative">
-          <select
-            value={filter.region}
-            onChange={(e) => onChange({ ...filter, region: e.target.value })}
-            className="appearance-none bg-black/30 text-gray-300 text-[11px] border border-white/10 rounded-full px-3 py-1.5 pr-7 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_10px_rgba(6,182,212,0.1)] transition-all cursor-pointer"
-          >
-            {REGIONS.map((r) => (
-              <option key={r} value={r === "全部" ? "" : r}>{r === "全部" ? "🌐 全部地区" : r}</option>
-            ))}
-          </select>
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none text-[10px]">▾</span>
-        </div>
+        <CustomSelect
+          value={filter.region}
+          options={REGIONS}
+          onChange={(v) => onChange({ ...filter, region: v })}
+          placeholder="🌐 全部地区"
+        />
 
         {/* 来源下拉 */}
-        <div className="relative">
-          <select
-            value={filter.source}
-            onChange={(e) => onChange({ ...filter, source: e.target.value })}
-            className="appearance-none bg-black/30 text-gray-300 text-[11px] border border-white/10 rounded-full px-3 py-1.5 pr-7 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_10px_rgba(6,182,212,0.1)] transition-all cursor-pointer"
-          >
-            {SOURCES.map((s) => (
-              <option key={s} value={s === "全部" ? "" : s}>{s === "全部" ? "📡 全部来源" : s}</option>
-            ))}
-          </select>
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none text-[10px]">▾</span>
-        </div>
+        <CustomSelect
+          value={filter.source}
+          options={SOURCES}
+          onChange={(v) => onChange({ ...filter, source: v })}
+          placeholder="📡 全部来源"
+        />
 
         {/* 排序分段控制器 */}
         <div className="flex items-center bg-black/20 border border-white/5 rounded-full overflow-hidden">

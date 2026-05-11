@@ -3,6 +3,7 @@ import type { RankingEntry } from "../../types";
 interface RankingPanelProps {
   entries: RankingEntry[];
   loading: boolean;
+  onSelect?: (id: string) => void;
 }
 
 function changeIcon(change: "up" | "down" | "new") {
@@ -18,7 +19,7 @@ function changeIcon(change: "up" | "down" | "new") {
 
 const TOP3_COLORS = ["text-yellow-400", "text-gray-300", "text-amber-600"];
 
-export function RankingPanel({ entries, loading }: RankingPanelProps) {
+export function RankingPanel({ entries, loading, onSelect }: RankingPanelProps) {
   return (
     <div className="glass-card p-3">
       {/* 标题 */}
@@ -40,9 +41,10 @@ export function RankingPanel({ entries, loading }: RankingPanelProps) {
       ) : (
         <div className="space-y-0.5">
           {entries.map((entry) => (
-            <div
+            <button
               key={entry.id}
-              className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-800/40 transition-colors animate-fade-in"
+              onClick={() => onSelect?.(entry.id)}
+              className="w-full flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-800/40 transition-colors animate-fade-in text-left"
             >
               {/* 排名 */}
               <span className={`w-5 text-center text-xs font-mono font-bold ${entry.rank <= 3 ? TOP3_COLORS[entry.rank - 1] ?? "text-gray-500" : "text-gray-600"}`}>
@@ -61,7 +63,7 @@ export function RankingPanel({ entries, loading }: RankingPanelProps) {
               <span className="text-xs font-mono text-cyan-400 w-8 text-right">
                 {entry.heatScore}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       )}

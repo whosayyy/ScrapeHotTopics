@@ -165,6 +165,7 @@ export async function runPipeline(
       heatScore: timeline?.heatScore ?? 50,
 
       // 新字段传播
+      category: firstCredResult?.category,
       platform: firstItem.platform ?? platformDisplay(firstItem.sourceId),
       authorName: firstItem.author,
       authorHandle: firstItem.authorHandle,
@@ -210,6 +211,7 @@ export async function runPipeline(
       heatScore: item.heat ?? 0,
 
       // 新字段传播
+      category: credResult?.category,
       platform: item.platform ?? platformDisplay(item.sourceId),
       authorName: item.author,
       authorHandle: item.authorHandle,

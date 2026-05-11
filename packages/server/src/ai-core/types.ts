@@ -29,11 +29,13 @@ export interface ProcessedEvent {
   publishTime?: string;   // ISO string from RawNews.publishedAt
 
   // AI 分析详情
+  category?: string;
   aiReasoning?: string;
   rawContent?: string;
   region?: string;
   credibilityScore?: number; // 0-100
   virality?: number;         // 0-100
+  relevanceScore?: number;   // 0-100 与核心热点相关性
   urgency?: boolean;
 }
 

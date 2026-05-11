@@ -6,7 +6,7 @@ export interface FilterState {
   region: string;
   category: string;
   source: string;
-  sort: "createdAt" | "viralityScore" | "credibilityScore";
+  sort: "heatScore" | "createdAt" | "viralityScore" | "credibilityScore";
 }
 
 /** 热点话题（来自 REST API） */

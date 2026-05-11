@@ -37,7 +37,7 @@ function App() {
           <TimelinePanel topic={selectedTopic} />
         }
         right={
-          <RankingPanel entries={entries} loading={rankingLoading} />
+          <RankingPanel entries={entries} loading={rankingLoading} onSelect={selectTopic} />
         }
       />
 

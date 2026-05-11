@@ -104,7 +104,7 @@ async function findOrCreateTopic(event: ProcessedEvent): Promise<{ id: string; i
     summary: event.summary,
     credibility: event.credibility,
     heatScore: event.heatScore,
-    category: event.tags[0] ?? event.credibility ? (event as any).category : undefined,
+    category: event.category,
     topSource: event.topSource,
     tags: JSON.stringify(event.tags),
     isAlert: event.heatScore >= BREAKING_THRESHOLD && event.credibility === "高可信",
