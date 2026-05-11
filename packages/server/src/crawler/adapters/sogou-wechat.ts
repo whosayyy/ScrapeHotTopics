@@ -3,10 +3,21 @@ import { createHttpClient } from "../utils/http.js";
 import { matchesKeywords } from "../utils/filter.js";
 import type { CrawlerAdapter, CrawlerKeywords, RawNews } from "../types.js";
 
+function parseSogouDate(scriptText: string): Date {
+  const match = scriptText.match(/timeConvert\('(\d+)'\)/);
+  if (match) {
+    const unixSeconds = parseInt(match[1]!, 10);
+    if (!isNaN(unixSeconds)) {
+      return new Date(unixSeconds * 1000);
+    }
+  }
+  return new Date();
+}
+
 export class SogouWechatAdapter implements CrawlerAdapter {
   readonly sourceId = "sogou-wechat";
   readonly sourceName = "搜狗微信";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://weixin.sogou.com",
@@ -33,9 +44,9 @@ export class SogouWechatAdapter implements CrawlerAdapter {
     const items: RawNews[] = [];
     const seen = new Set<string>();
 
-    $(".news-box .news-list li").each((_, el) => {
+    $(".news-list li").each((_, el) => {
       const $el = $(el);
-      const titleEl = $el.find("h3 a");
+      const titleEl = $el.find(".txt-box h3 a");
       const title = titleEl.text().trim();
       if (!title) return;
 
@@ -46,8 +57,9 @@ export class SogouWechatAdapter implements CrawlerAdapter {
       if (!matchesKeywords(title, keywords)) return;
 
       const snippet = $el.find(".txt-info").text().trim();
-      const account = $el.find(".account").text().trim();
-      const dateText = $el.find(".s-p").text().trim();
+      const account = $el.find(".s-p .all-time-y2").first().text().trim();
+      const scriptText = $el.find(".s-p .s2 script").html() ?? "";
+      const publishedAt = parseSogouDate(scriptText);
 
       items.push({
         sourceId: this.sourceId,
@@ -56,10 +68,10 @@ export class SogouWechatAdapter implements CrawlerAdapter {
         url: url.startsWith("http") ? url : `https://weixin.sogou.com${url}`,
         content: snippet || title,
         author: account || undefined,
-        publishedAt: dateText ? new Date(dateText) : new Date(),
+        publishedAt,
         heat: 0,
         tags: ["wechat"],
-        raw: { account, snippet, dateText },
+        raw: { account, snippet, scriptText },
       });
     });
 

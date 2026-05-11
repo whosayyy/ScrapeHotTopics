@@ -5,7 +5,7 @@ import type { CrawlerAdapter, CrawlerKeywords, RawNews } from "../types.js";
 export class GoogleTrendsAdapter implements CrawlerAdapter {
   readonly sourceId = "google-trends";
   readonly sourceName = "Google Trends";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://trends.google.com",

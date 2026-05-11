@@ -6,7 +6,7 @@ import type { CrawlerAdapter, CrawlerKeywords, RawNews } from "../types.js";
 export class GitHubTrendingAdapter implements CrawlerAdapter {
   readonly sourceId = "github-trending";
   readonly sourceName = "GitHub Trending";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://github.com",

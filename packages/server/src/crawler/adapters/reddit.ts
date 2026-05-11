@@ -19,7 +19,7 @@ interface RedditChild {
 export class RedditAdapter implements CrawlerAdapter {
   readonly sourceId = "reddit";
   readonly sourceName = "Reddit";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://www.reddit.com",

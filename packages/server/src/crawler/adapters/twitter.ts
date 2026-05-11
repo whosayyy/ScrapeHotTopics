@@ -17,7 +17,7 @@ interface TwitterIncludes {
 export class TwitterAdapter implements CrawlerAdapter {
   readonly sourceId = "twitter";
   readonly sourceName = "Twitter / X";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://api.twitter.com/2",

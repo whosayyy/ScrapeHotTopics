@@ -5,7 +5,7 @@ import type { CrawlerAdapter, CrawlerKeywords, RawNews } from "../types.js";
 export class BilibiliAdapter implements CrawlerAdapter {
   readonly sourceId = "bilibili";
   readonly sourceName = "B站热门";
-  readonly defaultInterval = 3 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://api.bilibili.com",

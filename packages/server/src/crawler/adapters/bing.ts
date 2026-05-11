@@ -3,10 +3,15 @@ import { createHttpClient } from "../utils/http.js";
 import { matchesKeywords } from "../utils/filter.js";
 import type { CrawlerAdapter, CrawlerKeywords, RawNews } from "../types.js";
 
+/**
+ * Bing News 适配器 — 注意: Bing 新闻搜索结果页现已改为 SPA（客户端渲染），
+ * 服务器端 HTML 抓取无法获取新闻内容。从中国大陆网络访问会被重定向至 cn.bing.com
+ * 且不返回新闻数据。保留此适配器作为占位，后续可接入 Bing News Search API（需 API Key）。
+ */
 export class BingNewsAdapter implements CrawlerAdapter {
   readonly sourceId = "bing";
   readonly sourceName = "Bing News";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://www.bing.com",

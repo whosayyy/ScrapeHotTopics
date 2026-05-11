@@ -21,7 +21,14 @@ export function createHttpClient(opts: HttpClientOptions): AxiosInstance {
   const client = axios.create(config);
 
   client.interceptors.request.use((cfg) => {
-    cfg.headers = createRandomHeaders();
+    const randomHeaders = createRandomHeaders();
+    // 只填充未自定义的请求头，保留适配器传入的特定头（如 Referer/Origin）
+    for (const [key, value] of Object.entries(randomHeaders)) {
+      if (!cfg.headers?.[key]) {
+        cfg.headers ??= new axios.AxiosHeaders();
+        (cfg.headers as any)[key] = value;
+      }
+    }
     return cfg;
   });
 

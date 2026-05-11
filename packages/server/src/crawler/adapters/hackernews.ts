@@ -5,7 +5,7 @@ import type { CrawlerAdapter, CrawlerKeywords, RawNews } from "../types.js";
 export class HackerNewsAdapter implements CrawlerAdapter {
   readonly sourceId = "hackernews";
   readonly sourceName = "HackerNews";
-  readonly defaultInterval = 5 * 60_000;
+  readonly defaultInterval = 30_000;
 
   private http = createHttpClient({
     baseURL: "https://hacker-news.firebaseio.com/v0",
